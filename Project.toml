@@ -1,0 +1,13 @@
+name = "DFUtil"
+uuid = "d0f0175c-9793-4b8c-b8d1-59b7835d16e7"
+authors = ["Matt H <matt-github@steponnopets.net> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
