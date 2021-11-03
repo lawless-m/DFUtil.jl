@@ -5,7 +5,6 @@ using Dates
 
 export sum_columns, group_data_into_periods, match_row, to_json
 
-
 function sum_columns(df, group_by::Vector{String}) 
 	buffer = combine(groupby(df, group_by),  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ])
 	rename(buffer, map(c-> c=>replace(c, "_function"=>"s"), names(buffer)))
