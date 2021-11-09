@@ -3,7 +3,7 @@ module DFUtil
 using DataFrames
 using Dates
 
-export sum_columns, group_data_into_periods, match_row, to_json
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
 
 function sum_columns(df, group_by::Vector{String}) 
 	buffer = combine(groupby(df, group_by),  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ])
@@ -38,7 +38,7 @@ function print_data_row(io, row, pkey, exports; prefix="")
 	print(io, prefix, "\"$(kesc(row[pkey]))\" : {")
 	print_term(io, row, exports[1])
 	broadcast(term -> print_term(io, row, term; prefix=", "), exports[2:end]);
-	print(io, " } ")
+	print(io, " } ");
 end
 
 function to_json(io::IO, data::DataFrame, pkey::AbstractString)
@@ -46,7 +46,13 @@ function to_json(io::IO, data::DataFrame, pkey::AbstractString)
 	print(io, "{ ")
 	print_data_row(io, eachrow(data)[1], pkey, exports)
 	broadcast(row->print_data_row(io, row, pkey, exports; prefix=", "), eachrow(data)[2:end])
-	print(io, " }")
+	print(io, " }");
+end
+
+function to_json_var(io::IO, data::DataFrame, pkey::AbstractString, var="object")
+	print("var $var=JSON.parse('")
+	to_json(io, data, pkey)
+	println(io, "');");
 end
 
 
