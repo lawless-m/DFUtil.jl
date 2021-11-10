@@ -99,9 +99,9 @@ end
 function to_json(io, df, keys)
 	print(io, "{ ")
 	if isa(keys, Array)
-		_to_json(io, groupby(data, keys[1]), keys, 1)
+		_to_json(io, groupby(df, keys[1]), keys, 1)
 	else
-		_to_json(io, groupby(data, keys), [keys], 1)
+		_to_json(io, groupby(df, keys), [keys], 1)
 	end
 	print(io, " }")
 end
@@ -115,7 +115,9 @@ function _to_json(io, data, keys, depth)
 	prefix = ""
 	if depth == length(keys)
 		print_data_row(io, row(data[1]), keys[depth], "")
-		broadcast(grp->print_data_row(io, row(grp), keys[depth], ", "), data[2:end])
+		for grp in data[2:end]
+			print_data_row(io, row(grp), keys[depth], ", ")
+	end
 	else
 		for grp in data 
 			k = kesc(grp[!, keys[depth]][1])
