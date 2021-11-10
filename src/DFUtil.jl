@@ -4,9 +4,89 @@ using DataFrames
 using Dates
 using Pipe
 
-export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, include_or_exclude
 export pQtr, pWeek, pYear, pMonth
 
+function force_vector(v)
+	if isa(v, String) || isa(v, Symbol)
+		return [v]
+	end
+	v = collect(Iterators.flatten([v]))
+	return isa(v, Vector) ? v : [v]
+end
+
+"""
+	include_or_exclude(df, includes, excludes)
+
+	Given a DataFrame either restrict it to the includes list, or remove the exludes list
+
+	Sounds a bit daft but it is to provide KW options in functions
+
+	If both are given, the `includes` take priority
+
+# Arguments
+- `df` the DataFrame
+- `includes` the String, Symbol or list of those to include
+- `excludes` the String, Symbol or list of those to exclude
+
+# Examples
+	```
+	df = DataFrame([[1,2,3], [10,20,30]], ["a", "b"])
+
+	include_or_exclude(df, includes="a")
+
+julia> include_or_exclude(df, includes=["a"])
+3×1 DataFrame
+ Row │ a
+     │ Int64
+─────┼───────
+   1 │     1
+   2 │     2
+   3 │     3
+
+   
+julia> include_or_exclude(df, excludes="a")
+3×1 DataFrame
+ Row │ b
+     │ Int64
+─────┼───────
+   1 │    10
+   2 │    20
+   3 │    30
+
+   
+julia> include_or_exclude(df, includes=["a"], excludes=["a", "b"])
+3×1 DataFrame
+ Row │ a
+     │ Int64
+─────┼───────
+   1 │     1
+   2 │     2
+   3 │     3
+```
+"""	
+function include_or_exclude(df; includes=nothing, excludes=nothing)
+	if excludes == nothing && includes == nothing
+		return df
+	end
+
+	if excludes == nothing
+		# force vector to makes sure it returns a DataFrame
+		return df[!, force_vector(includes)] 
+	end
+
+	if includes == nothing
+		return df[!, Not(excludes)]
+	end
+	# we have includes *and* excludes. 
+	# Includes take priority
+
+	# makes sure they are both lists, and the same datatype
+	includes = map(i->string(i), force_vector(includes))
+	excludes = map(e->string(e), force_vector(excludes))
+
+	return df[!, Not(filter(e->! (e in includes), excludes))]
+end
 """
 	sum_columns(df, group_by::Vector{String}=Vector{String}())
 

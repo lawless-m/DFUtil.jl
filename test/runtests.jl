@@ -22,4 +22,8 @@ eq(_, t) = String(take!(stdtest)) == t
     @test group_data_into_periods(dt, "d", :Qtr) == DataFrame([["2000Q1","2001Q1","2001Q4","2001Q3","2002Q1"], [3,3,2,1,3], [6,6,4,2,6]], ["ds", "bs", "cs"])
     @test group_data_into_periods(dt, :d, :Year) == DataFrame([[2000,2001,2002], [3,6,3], [6,12,6]], ["ds", "bs", "cs"])
     @test match_row(dt, :d, Date(2001,3,1)) == DataFrame([[Date(2001,3,1)], [1], [2]], ["d", "b", "c"])
+    @test include_or_exclude(df, includes="a") == DataFrame([[1,2]], ["a"])
+    @test include_or_exclude(df, includes=[:a]) == DataFrame([[1,2]], ["a"])
+    @test include_or_exclude(df, excludes=[:b, :c]) == DataFrame([[1,2]], ["a"])
+    @test include_or_exclude(df, excludes=["a", "b", "c"], includes=:a) == DataFrame([[1,2]], ["a"])
 end
