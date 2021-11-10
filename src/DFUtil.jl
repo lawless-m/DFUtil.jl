@@ -66,29 +66,6 @@ Not even sure why I introduced it
 """
 match_row(df, col, val) = filter(row -> row[col] == val, df)
 
-jesc(v) = replace(string(v), "'"=>"\\'")
-kesc(k) = replace(jesc(k), " "=>"")
-
-print_term(io, row, key, prefix="") = print(io, prefix, "\"$(kesc(key))\" : ", "\"$(jesc(row[key]))\""); 
-
-function print_terms(io, row)
-	print_term(io, row, names(row)[1], "")
-	broadcast(term -> print_term(io, row, term, ", "), names(row)[2:end]);
-end
-
-function print_data_row(io, row, pkey, prefix="")
-	print(io, prefix, "\"$(kesc(row[pkey]))\" : {")
-	print_terms(io, row)
-	print(io, " } ");
-end
-
-# previous version, in case I need to go back
-function to_jsonX(io::IO, data::DataFrame, pkey::AbstractString)
-	print(io, "{ ")
-	print_data_row(io, eachrow(data)[1], pkey)
-	broadcast(row->print_data_row(io, row, pkey; prefix=", "), eachrow(data)[2:end])
-	print(io, " }");
-end
 
 """
 	to_json_var(io::IO, df::DataFrame, keys::Union{AbstractString, Vector{AbstractString}}, var="object")
@@ -129,14 +106,16 @@ function to_json(io, df, keys)
 	print(io, " }")
 end
 
+
+# turn the first row of a DF into a DataFrameRow, a helper for _to_json
+row(grp) = eachrow(grp)[1]
+
 # helper for to_json
 function _to_json(io, data, keys, depth)
 	prefix = ""
 	if depth == length(keys)
-		for grp in data
-			print_data_row(io, eachrow(grp)[1], keys[depth], prefix)
-			prefix=", "
-		end
+		print_data_row(io, row(data[1]), keys[depth], "")
+		broadcast(grp->print_data_row(io, row(grp), keys[depth], ", "), data[2:end])
 	else
 		for grp in data 
 			k = kesc(grp[!, keys[depth]][1])
@@ -146,6 +125,27 @@ function _to_json(io, data, keys, depth)
 			prefix = ", "
 		end
 	end
+end
+
+
+# key / value escapers
+jesc(v) = replace(string(v), "'"=>"\\'")
+kesc(k) = replace(jesc(k), " "=>"")
+
+# print a key value pair
+print_term(io, row, key, prefix="") = print(io, prefix, "\"$(kesc(key))\" : ", "\"$(jesc(row[key]))\""); 
+
+# print all key value pairs, with appropriate comma-ing
+function print_terms(io, row)
+	print_term(io, row, names(row)[1], "")
+	broadcast(term -> print_term(io, row, term, ", "), names(row)[2:end]);
+end
+
+# print a compete row, with single pkey
+function print_data_row(io, row, pkey, prefix)
+	print(io, prefix, "\"$(kesc(row[pkey]))\" : {")
+	print_terms(io, row)
+	print(io, " } ");
 end
 
 ###
