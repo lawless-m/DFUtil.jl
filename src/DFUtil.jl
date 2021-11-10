@@ -2,6 +2,7 @@ module DFUtil
 
 using DataFrames
 using Dates
+using Pipe
 
 export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
 export pQtr, pWeek, pYear, pMonth
@@ -49,8 +50,10 @@ function group_data_into_periods(df, date_column, period; andgrpby=Vector{String
 	end
 
 	period_fns = Dict(:Qtr => pQtr, :Month => pMonth, :Year => pYear, :Week => pWeek)
-	
-	sum_columns(select(transform(df, date_column => ByRow(dt -> period_fns[period](dt))), Not(date_column)), group_by=vcat(andgrpby, ["$(date_column)_function"]))
+
+	@pipe transform(df, date_column => ByRow(dt -> period_fns[period](dt)) => "$(date_column)_function") |>
+		select(_, Not(date_column)) |> 
+		sum_columns(_, group_by=vcat(andgrpby, ["$(date_column)_function"]))
 end
 
 # period functions
