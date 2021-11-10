@@ -18,10 +18,9 @@ export pQtr, pWeek, pYear, pMonth
 - `group_by` Vector of String names of the columns to group by
 - `replace_with` by default DataFrames takes the column names and appends _function. Instead use this string.
 """
-function sum_columns(df; group_by::Vector{String}=Vector{String}(), replace_with="s") 
-	buffer = combine(groupby(df, group_by),  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ])
-	rename!(buffer, map(c-> c=>replace(c, "_function"=>replace_with), names(buffer)))
-end	
+sum_columns(df; group_by::Vector{String}=Vector{String}(), replace_with="s") = @pipe groupby(df, group_by) |>
+		combine(_,  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ]) |>
+		rename(_, map(c-> c=>replace(c, "_function"=>replace_with), names(_)))
 
 """
 	group_data_into_periods(df::DataFrame, date_column::Union{Symbol, AbstractString}, period::Union{Symbol, AbstractString}; andgrpby = Vector{String}())
