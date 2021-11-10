@@ -57,9 +57,14 @@ function group_data_into_periods(df, date_column, period; andgrpby=Vector{String
 	sum_columns(select(transform(df, date_column => ByRow(dt -> period_fns[period](dt))), Not(date_column)), group_by=vcat(andgrpby, ["$(date_column)_function"]))
 end
 
-function match_row(df, col, val)
-	filter(row -> row[col] == val, df)
-end
+"""
+match_row(df, col, val) 
+
+Just a shortcut for filter(row -> row[col] == val, df)
+
+Not even sure why I introduced it	
+"""
+match_row(df, col, val) = filter(row -> row[col] == val, df)
 
 jesc(v) = replace(string(v), "'"=>"\\'")
 kesc(k) = replace(jesc(k), " "=>"")
@@ -77,6 +82,7 @@ function print_data_row(io, row, pkey, prefix="")
 	print(io, " } ");
 end
 
+# previous version, in case I need to go back
 function to_jsonX(io::IO, data::DataFrame, pkey::AbstractString)
 	print(io, "{ ")
 	print_data_row(io, eachrow(data)[1], pkey)
@@ -123,6 +129,7 @@ function to_json(io, df, keys)
 	print(io, " }")
 end
 
+# helper for to_json
 function _to_json(io, data, keys, depth)
 	prefix = ""
 	if depth == length(keys)
