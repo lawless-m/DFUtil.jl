@@ -4,6 +4,7 @@ using DataFrames
 using Dates
 
 export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
+export pQtr, pWeek, pYear, pMonth
 
 """
 	sum_columns(df, group_by::Vector{String}=Vector{String}())
@@ -47,16 +48,43 @@ function group_data_into_periods(df, date_column, period; andgrpby=Vector{String
 		andgrpby = [andgrpby]
 	end
 
-	period_fns = Dict(
-		:Qtr   => dt-> ismissing(dt) ? missing : string(Dates.year(dt)) * "Q" * string(Dates.quarterofyear(dt)),
-		:Month => dt-> ismissing(dt) ? missing : string(Dates.year(dt)) * "-" * ("00" * string(Dates.month(dt)))[end-1:end],
-		:Year  => dt-> ismissing(dt) ? missing : string(Dates.year(dt)),
-		:Week  => dt-> ismissing(dt) ? missing : string(Dates.year(dt)) * "-" * ("00" * string(Dates.week(dt)))[end-1:end],
-	)
+	period_fns = Dict(:Qtr => pQtr, :Month => pMonth, :Year => pYear, :Week => pWeek)
 	
 	sum_columns(select(transform(df, date_column => ByRow(dt -> period_fns[period](dt))), Not(date_column)), group_by=vcat(andgrpby, ["$(date_column)_function"]))
 end
 
+# period functions
+"""
+	pQtr(dt)
+	turn a Date / Datetime into its eqivalent YearQn representation
+"""
+pQtr(dt)   = ismissing(dt) ? missing : string(Dates.year(dt)) * "Q" * string(Dates.quarterofyear(dt))
+"""
+pMonth(dt)
+	turn a Date / Datetime into its eqivalent YearMonth representation
+"""
+pMonth(dt) = ismissing(dt) ? missing : string(Dates.year(dt)) * "-" * ("00" * string(Dates.month(dt)))[end-1:end]
+"""
+	pYear(dt)
+	turn a Date / Datetime into its eqivalent Year representation
+"""
+pYear(dt)  = ismissing(dt) ? missing : Dates.year(dt)
+"""
+	pWeek(dt)
+	turn a Date / Datetime into its eqivalent YearWeek representation
+"""
+function pWeek(dt) # this is the tricky one because 2000-01-01 is 1999-52
+	if ismissing(dt) 
+		return  missing
+	end
+	m = Dates.month(dt)
+	w = Dates.week(dt)
+	y = Dates.year(dt)
+	if m == 1 && w > 10 
+		y = y - 1
+	end
+	"$y-" * ("00" * string(w))[end-1:end] # right pad with 0
+end
 """
 match_row(df, col, val) 
 
@@ -122,7 +150,7 @@ function _to_json(io, data, keys, depth)
 		for grp in data 
 			k = kesc(grp[!, keys[depth]][1])
 			print(io, prefix, "\"$k\" : {")
-			_to_json(io, groupby(grp, keys[depth+1]), keys, depth=depth+1)
+			_to_json(io, groupby(grp, keys[depth+1]), keys, depth+1)
 			print(io, " }");
 			prefix = ", "
 		end
