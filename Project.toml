@@ -10,6 +10,7 @@ Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 
 [compat]
 DataFrames = "1"
+Pipe = "1"
 julia = "1.6"
 
 [extras]
