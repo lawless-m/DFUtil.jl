@@ -4,7 +4,7 @@ using DataFrames
 using Dates
 using Pipe
 
-export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, include_or_exclude
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, include_or_exclude, firstrow, lastrow, nthrow
 export pQtr, pWeek, pYear, pMonth
 
 function force_vector(v)
@@ -305,6 +305,31 @@ function print_data_row(io, row, pkey, prefix)
 	print_terms(io, row)
 	print(io, " } ");
 end
+"""
+	nthrow(df)
+
+Return the nth row of a dataframe as a DataFrameRow, if n is out of bounds, return nothing
+"""
+function nthrow(df, n)
+	if size(df)[1] < n || n < 1
+		return
+	end
+	eachrow(df)[n]
+end
+
+"""
+	firstrow(df)
+
+Return the first row as a DataFrameRow
+"""
+firstrow(df) = nthrow(df, 1)
+
+"""
+	lastrow(df)
+
+	Return the last row of df as a DataFrameRow
+"""
+lastrow(df) = nthrow(df, size(df)[1])
 
 ###
 end

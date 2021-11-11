@@ -41,3 +41,15 @@ to_json_var
 ```@docs
 include_or_exclude
 ```
+
+```@docs
+nthrow
+```
+
+```@docs
+firstrow
+```
+
+```@docs
+lastrow
+```
