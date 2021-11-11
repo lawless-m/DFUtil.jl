@@ -90,8 +90,9 @@ end
 """
 	sum_columns(df, group_by::Vector{String}=Vector{String}())
 
-sum the columns of the dataframe, optionally grouping by group_by
-all the columns not in the grouping *must* have a `+` method
+Sum the columns of the dataframe, optionally grouping by group_by
+
+All the columns not in the grouping *must* have a `+` method
 
 # Arguments
 
@@ -108,7 +109,7 @@ sum_columns(df; group_by::Vector{String}=Vector{String}(), replace_with="s") = @
 
 Using the given data_column, group the dataframe into periods.
 
-All columns except the grouping ones *must* have methods for +
+All columns except the grouping ones *must* have methods for `+``
 
 # Arguments
 - `df` DataFrame to group
@@ -176,7 +177,7 @@ end
 """
 	match_row(df, col, val) 
 
-Just a shortcut for filter(row -> row[col] == val, df)
+Just a shortcut for `filter(row -> row[col] == val, df)`
 
 """
 match_row(df, col, val) = filter(row -> row[col] == val, df)
@@ -214,6 +215,27 @@ Output the dataframe to Json, grouping by the given keys
 
 	{ "row[keys[1]]" : { "row[keys[2]]" : { "names(row)[1]" : "row[names(row[1])]", "names(row)[2]" : "row[names(row[2])]", ..., "names(row)[end]" : "row[names(row[end])]"}}}
 	
+The motivation for this is to enable referencing the objects via their nested keys in JavaScript
+
+	julia> df = DataFrame([[10, 10, 11], [1, 2, 3], ["Fred", "Luke", "Alice"]], ["Area", "EmpId", "Name"])
+	3×3 DataFrame
+	 Row │ Area   EmpId  Name
+		 │ Int64  Int64  String
+	─────┼──────────────────────
+	   1 │    10      1  Fred
+	   2 │    10      2  Luke
+	   3 │    11      1  Alice
+	
+	   julia> to_json(stdout, df, ["Area", "EmpId"])
+	   
+	   { "10" : {"1" : {"Area" : "10", "EmpId" : "1", "Name" : "Fred" } , "2" : {"Area" : "10", "EmpId" : "2", "Name" : "Luke" }  }, "11" : {"3" : {"Area" : "11", "EmpId" : "3", "Name" : "Alice" }  } }
+
+in Javascript
+
+	let fred = object[10][1]	
+	let luke = object[10][2]		
+	let alice = object[11][1]
+
 # Arguments
 - `io` IO handle to write to
 - `df` DataFrame to write
