@@ -33,8 +33,6 @@ If both are given, the `includes` take priority
 
 	df = DataFrame([[1,2,3], [10,20,30]], ["a", "b"])
 
-	include_or_exclude(df, includes="a")
-
 	julia> include_or_exclude(df, includes=["a"])
 	3×1 DataFrame
 	Row │ a
