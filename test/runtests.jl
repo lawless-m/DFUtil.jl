@@ -19,7 +19,7 @@ eq(_, t) = String(take!(stdtest)) == t
     @test sum_columns(ddf, group_by=["a"], replace_with="X") == DataFrame([[1,2], [3,6], [4,8]], ["a", "bX", "cX"])
     @test group_data_into_periods(dt, :d, "Week") == DataFrame([["1999-52", "2000-05", "2000-09", "2001-01", "2001-05", "2001-09", "2001-48", "2001-26", "2002-01", "2002-05", "2002-09"],[1,1,1,2,1,1,1,1,1,1,1],[2,2,2,4,2,2,2,2,2,2,2]], ["ds", "bs", "cs"])
     @test group_data_into_periods(dt, :d, "Month") == DataFrame([["2000-01", "2000-02", "2000-03", "2001-01", "2001-02", "2001-03", "2001-12", "2001-07", "2002-01", "2002-02", "2002-03"],[1,1,1,1,1,1,2,1,1,1,1],[2,2,2,2,2,2,4,2,2,2,2]], ["ds", "bs", "cs"])
-    @test group_data_into_periods(dt, "d", :Qtr) == DataFrame([["2000Q1","2001Q1","2001Q4","2001Q3","2002Q1"], [3,3,2,1,3], [6,6,4,2,6]], ["ds", "bs", "cs"])
+    @test group_data_into_periods(dt, "d", :Quarter) == DataFrame([["2000Q1","2001Q1","2001Q4","2001Q3","2002Q1"], [3,3,2,1,3], [6,6,4,2,6]], ["ds", "bs", "cs"])
     @test group_data_into_periods(dt, :d, :Year) == DataFrame([[2000,2001,2002], [3,6,3], [6,12,6]], ["ds", "bs", "cs"])
     @test match_row(dt, :d, Date(2001,3,1)) == DataFrame([[Date(2001,3,1)], [1], [2]], ["d", "b", "c"])
     @test include_or_exclude(df, includes="a") == DataFrame([[1,2]], ["a"])
