@@ -5,7 +5,7 @@ using Dates
 using Pipe
 
 export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, include_or_exclude, firstrow, lastrow, nthrow
-export pQtr, pWeek, pYear, pMonth
+export pQuarter, pWeek, pYear, pMonth
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
@@ -112,13 +112,13 @@ All columns except the grouping ones *must* have methods for `+``
 # Arguments
 - `df` DataFrame to group
 - `date_column` the column to use as the grouping
-- `period` Period to use, options are: :Qtr, :Month, :Year, :Week (or as strings)
+- `period` Period to use, options are: :Quarter, :Month, :Year, :Week (or as strings)
 - `andgrpby` optional keyword to use additional groupings
 
 # Examples
 	group_data_into_periods(df, :SaleDate, :Week)
 	group_data_into_periods(df, "SaleDate", :Year, "BranchId")
-	group_data_into_periods(df, :SaleDate, "Qtr", [:Area, :BranchId)]
+	group_data_into_periods(df, :SaleDate, "Quarter", [:Area, :BranchId)]
 """
 function group_data_into_periods(df, date_column, period; andgrpby=Vector{String}())
 	if isa(period, String)
@@ -128,7 +128,7 @@ function group_data_into_periods(df, date_column, period; andgrpby=Vector{String
 		andgrpby = [andgrpby]
 	end
 
-	period_fns = Dict(:Qtr => pQtr, :Month => pMonth, :Year => pYear, :Week => pWeek)
+	period_fns = Dict(:Quarter => pQuarter, :Month => pMonth, :Year => pYear, :Week => pWeek)
 
 	@pipe transform(df, date_column => ByRow(dt -> period_fns[period](dt)) => "$(date_column)_function") |>
 		select(_, Not(date_column)) |> 
@@ -137,11 +137,11 @@ end
 
 # period functions
 """
-	pQtr(dt)
+	pQuarter(dt)
 
 turn a Date / Datetime into its eqivalent YearQn representation e.g. 2001Q1
 """
-pQtr(dt)   = ismissing(dt) ? missing : string(Dates.year(dt)) * "Q" * string(Dates.quarterofyear(dt))
+pQuarter(dt)   = ismissing(dt) ? missing : string(Dates.year(dt)) * "Q" * string(Dates.quarterofyear(dt))
 """
 pMonth(dt)
 
