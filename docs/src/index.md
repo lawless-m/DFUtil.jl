@@ -11,7 +11,7 @@ group_data_into_periods
 ```
 
 ```@docs
-pQtr
+pQuarter
 ```
 
 ```@docs
