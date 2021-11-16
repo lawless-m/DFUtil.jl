@@ -4,7 +4,8 @@ using DataFrames
 using Dates
 using Pipe
 
-export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, include_or_exclude, firstrow, lastrow, nthrow
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
+export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 
 function force_vector(v)
@@ -330,6 +331,46 @@ firstrow(df) = nthrow(df, 1)
 	Return the last row of df as a DataFrameRow
 """
 lastrow(df) = nthrow(df, size(df)[1])
+
+"""
+	de_miss_rows(df)
+	
+For a given DataFrame, remove any rows in which any column has a missing value
+
+# Examples
+
+	df = DataFrame([[1,missing,3], [10,20,30]], ["a", "b"])
+	3×2 DataFrame
+	 Row │ a        b
+		 │ Int64?   Int64?
+	─────┼─────────────────
+	   1 │       1      10
+	   2 │ missing      20
+	   3 │       3      30
+		
+	julia> dm = de_miss_rows(df)
+	2×2 DataFrame
+	 Row │ a       b
+		 │ Int64?  Int64?
+	─────┼────────────────
+	   1 │      1      10
+	   2 │      3      30
+		
+"""
+function de_miss_rows(df)
+
+	function anymissing(row)
+		for n in names(df)
+			if ismissing(row[n])
+				return false
+			end
+		end
+		return true
+	end
+		
+	filter(anymissing, df)
+end
+
 
 ###
 end

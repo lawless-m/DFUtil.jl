@@ -53,3 +53,8 @@ firstrow
 ```@docs
 lastrow
 ```
+
+```@docs
+de_miss_rows
+```
+
