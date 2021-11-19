@@ -387,7 +387,7 @@ turn the dataframe into the string representation of the CSV
 	[-2.954101,-2.954101,-2.954101]], ["lat1", "lon1", "lat2", "lon2"])
 
 	to_csv_text(df)
-	"lat1,lon1,lat2,lon2\n53.685335,-0.416387,53.479544,-2.954101\n53.785335,-0.426387,53.479544,-2.954101\n53.885335,-0.436387,53.479544,-2.954101\n"
+	"lat1,lon1,lat2,lon2\\n53.685335,-0.416387,53.479544,-2.954101\\n53.785335,-0.426387,53.479544,-2.954101\\n53.885335,-0.436387,53.479544,-2.954101\\n"
 """
 function to_csv_text(df)
 	out = IOBuffer()
@@ -402,7 +402,8 @@ end
 Create a dataframe from the string represenation of a CSV
 
 # Examples
-	from_csv_text("lat1,lon1,lat2,lon2\n53.685335,-0.416387,53.479544,-2.954101\n53.785335,-0.426387,53.479544,-2.954101\n53.885335,-0.436387,53.479544,-2.954101\n")
+
+	from_csv_text("lat1,lon1,lat2,lon2\\n53.685335,-0.416387,53.479544,-2.954101\\n53.785335,-0.426387,53.479544,-2.954101\\n53.885335,-0.436387,53.479544,-2.954101\\n")
 
 	3×4 DataFrame
 	Row │ lat1     lon1       lat2     lon2
@@ -411,6 +412,7 @@ Create a dataframe from the string represenation of a CSV
 	  1 │ 53.6853  -0.416387  53.4795  -2.9541
 	  2 │ 53.7853  -0.426387  53.4795  -2.9541
 	  3 │ 53.8853  -0.436387  53.4795  -2.9541
+	  
 """
 from_csv_text(csv_text) = CSV.read(IOBuffer(csv_text), DataFrame)
 
