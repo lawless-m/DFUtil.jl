@@ -8,6 +8,7 @@ using CSV
 export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
+export to_csv_text, from_csv_text
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
