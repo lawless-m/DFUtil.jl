@@ -58,3 +58,11 @@ lastrow
 de_miss_rows
 ```
 
+```@docs
+to_csv_text
+```
+
+```@docs
+from_csv_text
+```
+
