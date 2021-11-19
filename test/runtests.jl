@@ -27,4 +27,7 @@ eq(_, t) = String(take!(stdtest)) == t
     @test include_or_exclude(df, excludes=[:b, :c]) == DataFrame([[1,2]], ["a"])
     @test include_or_exclude(df, excludes=["a", "b", "c"], includes=:a) == DataFrame([[1,2]], ["a"])
 	@test de_miss_rows(DataFrame([[1,missing,3], [10,20,30]], ["a", "b"])) == DataFrame([[1,3], [10,30]], ["a", "b"])
+    @test to_csv_text(df) == "a,b,c\n1,3,4\n2,4,5\n"
+    @test from_csv_text("a,b,c\n1,3,4\n2,4,5\n") == df
+    @test from_csv_text(to_csv_text(dt)) == dt
 end
