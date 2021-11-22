@@ -5,3 +5,5 @@
 [![Coverage](https://codecov.io/gh/lawless-m/DFUtil.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/lawless-m/DFUtil.jl)
 
 [Documentation](https://lawless-m.github.io/DFUtil.jl/)
+
+register
