@@ -6,4 +6,3 @@
 
 [Documentation](https://lawless-m.github.io/DFUtil.jl/)
 
-register
