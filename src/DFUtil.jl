@@ -335,6 +335,32 @@ firstrow(df) = nthrow(df, 1)
 lastrow(df) = nthrow(df, size(df)[1])
 
 """
+	exclude_rows(df, fn)
+	
+Exclude any row which has any column return true for the function
+
+# Examples
+
+	exclude_rows(df, ismissing)
+	exclude_rows(df, isnan)
+
+"""
+
+function exclude_rows(df, fn)
+
+	function pass(row)
+		for n in names(df)
+			if fn(row[n])
+				return false
+			end
+		end
+		return true
+	end
+		
+	filter(pass, df)
+end
+
+"""
 	de_miss_rows(df)
 	
 For a given DataFrame, remove any rows in which any column has a missing value
@@ -359,19 +385,8 @@ For a given DataFrame, remove any rows in which any column has a missing value
 	   2 │      3      30
 		
 """
-function de_miss_rows(df)
+de_miss_rows(df) = exclude_rows(df, ismissing)
 
-	function anymissing(row)
-		for n in names(df)
-			if ismissing(row[n])
-				return false
-			end
-		end
-		return true
-	end
-		
-	filter(anymissing, df)
-end
 
 """
 	to_csv_text(df) 

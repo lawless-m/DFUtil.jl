@@ -55,6 +55,10 @@ lastrow
 ```
 
 ```@docs
+exclude_rows
+```
+
+```@docs
 de_miss_rows
 ```
 
