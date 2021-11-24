@@ -9,6 +9,7 @@ export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 export to_csv_text, from_csv_text
+export concat!, leftjoiner
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
@@ -430,6 +431,24 @@ Create a dataframe from the string represenation of a CSV
 	  
 """
 from_csv_text(csv_text) = CSV.read(IOBuffer(csv_text), DataFrame)
+
+"""
+	concat!(df, args...) 
+
+All of the dataframes supplied as args, appended to df
+"""
+concat!(df, args...) = reduce((adf, df)->append!(adf, df), args, init=df)
+
+"""
+	leftjoiner(df, on, args...; kw...)
+
+# Arguments
+- `df` The initial DataFrame
+- `on` The field(s) to join with
+- `args...` The DataFrames to join to the df
+- `kw...` KW args passed to leftjoin
+"""
+leftjoiner(df, on, args...; kw...) = reduce((accumdf, nextdf)->leftjoin(accumdf, nextdf, on=on, kw...), args, init=df)
 
 ###
 end

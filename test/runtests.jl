@@ -7,13 +7,19 @@ df = DataFrame([[1,2],[3,4],[4,5]],["a", "b", "c"])
 ddf = DataFrame([[1,2,2],[3,4,2],[4,5,3]], ["a", "b", "c"])
 dt = DataFrame([[ Date(2000, 1, 1), Date(2000, 2, 1), Date(2000, 3, 1),Date(2001, 1, 1), Date(2001, 2, 1), Date(2001, 3, 1),Date(2001, 12, 1), Date(2001, 7, 1), Date(2001, 12, 31),Date(2002, 1, 1),Date(2002, 2, 1),Date(2002, 3, 1)],[1,1,1,1,1,1,1,1,1,1,1,1],[2,2,2,2,2,2,2,2,2,2,2,2]], ["d", "b", "c"])
 
+dfab = DataFrame([[1,2,3], [4,5,6]], ["a", "b"])
+dfac = DataFrame([[1,2,3], [4,5,6]], ["a", "c"])
+dfad = DataFrame([[1,2,3], [4,5,6]], ["a", "d"])
+dfabcd = DataFrame([[1,2,3], [4,5,6], [4,5,6], [4,5,6]], ["a", "b", "c", "d"])
+
+
 stdtest = IOBuffer()
 eq(_, t) = String(take!(stdtest)) == t
 
 @testset "DFUtil.jl" begin
-    @test eq(DFUtil.to_json(stdtest, df, "a"), "{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }")
-    @test eq(DFUtil.to_json(stdtest, df, ["a", "b"]), "{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }")
-    @test eq(DFUtil.to_json_var(stdtest, df, ["a", "b"],"test"), "var test=JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
+    @test eq(to_json(stdtest, df, "a"), "{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }")
+    @test eq(to_json(stdtest, df, ["a", "b"]), "{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }")
+    @test eq(to_json_var(stdtest, df, ["a", "b"],"test"), "var test=JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
     @test sum_columns(df) == DataFrame([[3],[7],[9]],["as","bs","cs"])
     @test sum_columns(ddf, group_by=["a"]) == DataFrame([[1,2], [3,6], [4,8]], ["a", "bs", "cs"])
     @test sum_columns(ddf, group_by=["a"], replace_with="X") == DataFrame([[1,2], [3,6], [4,8]], ["a", "bX", "cX"])
@@ -30,4 +36,6 @@ eq(_, t) = String(take!(stdtest)) == t
     @test to_csv_text(df) == "a,b,c\n1,3,4\n2,4,5\n"
     @test from_csv_text("a,b,c\n1,3,4\n2,4,5\n") == df
     @test from_csv_text(to_csv_text(dt)) == dt
+	@test leftjoiner(dfab, :a, dfac, dfad) == dfabcd
+	@test concat!(DataFrame(), df, DataFrame([[2],[2],[3]], ["a", "b", "c"])) == ddf
 end

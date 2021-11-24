@@ -70,3 +70,10 @@ to_csv_text
 from_csv_text
 ```
 
+```@docs
+concat!
+```
+
+```@docs
+leftjoiner
+```
