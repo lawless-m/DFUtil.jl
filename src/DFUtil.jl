@@ -305,7 +305,7 @@ function _to_json(io, data, keys, depth)
 		print_data_row(io, row(data[1]), keys[depth], "")
 		for grp in data[2:end]
 			print_data_row(io, row(grp), keys[depth], ", ")
-	end
+		end
 	else
 		for grp in data 
 			k = kesc(grp[!, keys[depth]][1])

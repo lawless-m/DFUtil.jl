@@ -39,6 +39,10 @@ to_json_var
 ```
 
 ```@docs
+to_js_value
+```
+
+```@docs
 include_or_exclude
 ```
 
