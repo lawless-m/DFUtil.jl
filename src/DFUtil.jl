@@ -5,7 +5,7 @@ using Dates
 using Pipe
 using CSV
 
-export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, to_js_value
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 export to_csv_text, from_csv_text
@@ -202,13 +202,41 @@ Output the dataframe to json using to_json but wrap it inside a Javascript JSON.
 
 	to_json_var(stdout, df, "a", "object")
 
-	"var object=JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
+	"var object = JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
 """
 function to_json_var(io::IO, df::DataFrame, keys, var="object")
-	print(io, "var $var=JSON.parse('")
+	print(io, "var $var = JSON.parse('")
 	to_json(io, df, keys)
 	println(io, "');");
 end
+
+
+"""
+	to_js_value(io::IO, df::DataFrame, keys::Union{AbstractString, Vector{AbstractString}}, jsdeclaration="var object")
+
+Output the dataframe to json using to_json but wrap it inside a Javascript JSON.parse() for direct use in Javascript
+
+# Arguments
+- `io` IO handle to write to
+- `df` DataFrame to write
+- `keys` Keys to lift outside the object - see [`to_json`](@ref) for explanation of that
+- `var` JavaScript object name it will be assign to with `var \$var = ....`
+
+# Examples
+
+	df = DataFrame([[1,2],[3,4],[4,5]],["a", "b", "c"]), "a")
+
+	to_js_value(stdout, df, "a", "export const vals")
+
+	"export const vals = JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
+"""
+function to_js_value(io::IO, df::DataFrame, keys, jsdeclaration="var object")
+	print(io, "$jsdeclaration = JSON.parse('")
+	to_json(io, df, keys)
+	println(io, "');");
+end
+
+
 
 """
 	to_json(io::IO, data::DataFrame, keys::Union{AbstractString, Vector{AbstractString}})

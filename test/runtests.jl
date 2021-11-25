@@ -19,7 +19,9 @@ eq(_, t) = String(take!(stdtest)) == t
 @testset "DFUtil.jl" begin
     @test eq(to_json(stdtest, df, "a"), "{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }")
     @test eq(to_json(stdtest, df, ["a", "b"]), "{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }")
-    @test eq(to_json_var(stdtest, df, ["a", "b"],"test"), "var test=JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
+    @test eq(to_json_var(stdtest, df, ["a", "b"],"test"), "var test = JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
+	@test eq(to_js_value(stdtest, df, ["a", "b"],"var test"), "var test = JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
+	@test eq(to_js_value(stdtest, df, ["a", "b"],"export const test"), "export const test = JSON.parse('{ \"1\" : {\"3\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" }  }, \"2\" : {\"4\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  } }');\n")
     @test sum_columns(df) == DataFrame([[3],[7],[9]],["as","bs","cs"])
     @test sum_columns(ddf, group_by=["a"]) == DataFrame([[1,2], [3,6], [4,8]], ["a", "bs", "cs"])
     @test sum_columns(ddf, group_by=["a"], replace_with="X") == DataFrame([[1,2], [3,6], [4,8]], ["a", "bX", "cX"])
