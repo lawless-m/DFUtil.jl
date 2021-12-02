@@ -39,6 +39,10 @@ to_json_var
 ```
 
 ```@docs
+to_js_value
+```
+
+```@docs
 include_or_exclude
 ```
 
@@ -55,6 +59,10 @@ lastrow
 ```
 
 ```@docs
+exclude_rows
+```
+
+```@docs
 de_miss_rows
 ```
 
@@ -66,3 +74,10 @@ to_csv_text
 from_csv_text
 ```
 
+```@docs
+concat!
+```
+
+```@docs
+leftjoiner
+```

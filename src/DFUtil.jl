@@ -5,10 +5,11 @@ using Dates
 using Pipe
 using CSV
 
-export sum_columns, group_data_into_periods, match_row, to_json, to_json_var
+export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, to_js_value
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 export to_csv_text, from_csv_text
+export concat!, leftjoiner, tryRename, tryRename!
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
@@ -201,13 +202,41 @@ Output the dataframe to json using to_json but wrap it inside a Javascript JSON.
 
 	to_json_var(stdout, df, "a", "object")
 
-	"var object=JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
+	"var object = JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
 """
 function to_json_var(io::IO, df::DataFrame, keys, var="object")
-	print(io, "var $var=JSON.parse('")
+	print(io, "var $var = JSON.parse('")
 	to_json(io, df, keys)
 	println(io, "');");
 end
+
+
+"""
+	to_js_value(io::IO, df::DataFrame, keys::Union{AbstractString, Vector{AbstractString}}, jsdeclaration="var object")
+
+Output the dataframe to json using to_json but wrap it inside a Javascript JSON.parse() for direct use in Javascript
+
+# Arguments
+- `io` IO handle to write to
+- `df` DataFrame to write
+- `keys` Keys to lift outside the object - see [`to_json`](@ref) for explanation of that
+- `var` JavaScript object name it will be assign to with `var \$var = ....`
+
+# Examples
+
+	df = DataFrame([[1,2],[3,4],[4,5]],["a", "b", "c"]), "a")
+
+	to_js_value(stdout, df, "a", "export const vals")
+
+	"export const vals = JSON.parse('{ \"1\" : {\"a\" : \"1\", \"b\" : \"3\", \"c\" : \"4\" } , \"2\" : {\"a\" : \"2\", \"b\" : \"4\", \"c\" : \"5\" }  }');"
+"""
+function to_js_value(io::IO, df::DataFrame, keys, jsdeclaration="var object")
+	print(io, "$jsdeclaration = JSON.parse('")
+	to_json(io, df, keys)
+	println(io, "');");
+end
+
+
 
 """
 	to_json(io::IO, data::DataFrame, keys::Union{AbstractString, Vector{AbstractString}})
@@ -276,7 +305,7 @@ function _to_json(io, data, keys, depth)
 		print_data_row(io, row(data[1]), keys[depth], "")
 		for grp in data[2:end]
 			print_data_row(io, row(grp), keys[depth], ", ")
-	end
+		end
 	else
 		for grp in data 
 			k = kesc(grp[!, keys[depth]][1])
@@ -335,6 +364,32 @@ firstrow(df) = nthrow(df, 1)
 lastrow(df) = nthrow(df, size(df)[1])
 
 """
+	exclude_rows(df, fn)
+	
+Exclude any row which has any column return true for the function
+
+# Examples
+
+	exclude_rows(df, ismissing)
+	exclude_rows(df, isnan)
+
+"""
+
+function exclude_rows(df, fn)
+
+	function pass(row)
+		for n in names(df)
+			if fn(row[n])
+				return false
+			end
+		end
+		return true
+	end
+		
+	filter(pass, df)
+end
+
+"""
 	de_miss_rows(df)
 	
 For a given DataFrame, remove any rows in which any column has a missing value
@@ -359,19 +414,8 @@ For a given DataFrame, remove any rows in which any column has a missing value
 	   2 │      3      30
 		
 """
-function de_miss_rows(df)
+de_miss_rows(df) = exclude_rows(df, ismissing)
 
-	function anymissing(row)
-		for n in names(df)
-			if ismissing(row[n])
-				return false
-			end
-		end
-		return true
-	end
-		
-	filter(anymissing, df)
-end
 
 """
 	to_csv_text(df) 
@@ -416,5 +460,39 @@ Create a dataframe from the string represenation of a CSV
 """
 from_csv_text(csv_text) = CSV.read(IOBuffer(csv_text), DataFrame)
 
+"""
+	concat!(df, args...) 
+
+All of the dataframes supplied as args, appended to df
+"""
+concat!(df, args...) = reduce((adf, df)->append!(adf, df), args, init=df)
+
+"""
+	leftjoiner(df, on, args...; kw...)
+
+# Arguments
+- `df` The initial DataFrame
+- `on` The field(s) to join with
+- `args...` The DataFrames to join to the df
+- `kw...` KW args passed to leftjoin
+"""
+leftjoiner(df, on, args...; kw...) = reduce((accumdf, nextdf)->leftjoin(accumdf, nextdf, on=on, kw...), args, init=df)
+
+"""
+	tryRename(df, renamelist)
+	tryRename!(df, renamelist)
+
+Attempts to renames the given fields, however, unlike DataFrames.rename, doesn't complain if the column doesn't exist
+
+"""
+tryRename(df, renamelist::Pair) = tryRename(df, [renamelist])
+tryRename(df, renamelist::Vector{Pair{T,T}}) where T <: Any = tryRename(df, map(p->Symbol(p[1])=>Symbol(p[2]), renamelist))
+tryRename(df, renamelist::Vector{Pair{Symbol, Symbol}}) = tryRenameFn(df, filter(p->p[1] in map(Symbol, names(df)), renamelist), rename)
+
+tryRename!(df, renamelist::Pair) = tryRename(df, [renamelist])
+tryRename!(df, renamelist::Vector{Pair{T,T}}) where T <: Any = tryRename(df, map(p->Symbol(p[1])=>Symbol(p[2]), renamelist))
+tryRename!(df, renamelist::Vector{Pair{Symbol, Symbol}}) = tryRenameFn(df, filter(p->p[1] in map(Symbol, names(df)), renamelist), rename!)
+tryRenameFn(df, renamelist, fn) = fn(df, renamelist)
+	
 ###
 end
