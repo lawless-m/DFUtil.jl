@@ -81,3 +81,7 @@ concat!
 ```@docs
 leftjoiner
 ```
+
+```@docs
+tryRename
+```
