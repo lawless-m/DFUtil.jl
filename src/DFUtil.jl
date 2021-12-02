@@ -9,7 +9,7 @@ export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, to
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 export to_csv_text, from_csv_text
-export concat!, leftjoiner
+export concat!, leftjoiner, tryRename, tryRename!
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
@@ -478,5 +478,21 @@ concat!(df, args...) = reduce((adf, df)->append!(adf, df), args, init=df)
 """
 leftjoiner(df, on, args...; kw...) = reduce((accumdf, nextdf)->leftjoin(accumdf, nextdf, on=on, kw...), args, init=df)
 
+"""
+	tryRename(df, renamelist)
+	tryRename!(df, renamelist)
+
+Attempts to renames the given fields, however, unlike DataFrames.rename, doesn't complain if the column doesn't exist
+
+"""
+tryRename(df, renamelist::Pair) = tryRename(df, [renamelist])
+tryRename(df, renamelist::Vector{Pair{T,T}}) where T <: Any = tryRename(df, map(p->Symbol(p[1])=>Symbol(p[2]), renamelist))
+tryRename(df, renamelist::Vector{Pair{Symbol, Symbol}}) = tryRenameFn(df, filter(p->p[1] in map(Symbol, names(df)), renamelist), rename)
+
+tryRename!(df, renamelist::Pair) = tryRename(df, [renamelist])
+tryRename!(df, renamelist::Vector{Pair{T,T}}) where T <: Any = tryRename(df, map(p->Symbol(p[1])=>Symbol(p[2]), renamelist))
+tryRename!(df, renamelist::Vector{Pair{Symbol, Symbol}}) = tryRenameFn(df, filter(p->p[1] in map(Symbol, names(df)), renamelist), rename!)
+tryRenameFn(df, renamelist, fn) = fn(df, renamelist)
+	
 ###
 end

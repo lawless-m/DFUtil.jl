@@ -40,4 +40,8 @@ eq(_, t) = String(take!(stdtest)) == t
     @test from_csv_text(to_csv_text(dt)) == dt
 	@test leftjoiner(dfab, :a, dfac, dfad) == dfabcd
 	@test concat!(DataFrame(), df, DataFrame([[2],[2],[3]], ["a", "b", "c"])) == ddf
+    @test tryRename(dfab, [:a=>:c]) == dfac
+    @test tryRename(dfab, "a"=>"c") == dfac
+    @test tryRename(dfab, "a"=>:c) == dfac
+    @test tryRename(df, ["a"=>:c, :b=>"z"]) == DataFrame([[1,2],[3,4],[4,5]],["c", "z", "c"])
 end
