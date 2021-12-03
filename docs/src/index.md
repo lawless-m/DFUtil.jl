@@ -85,3 +85,7 @@ leftjoiner
 ```@docs
 tryRename
 ```
+
+```@docs
+dropByName!
+```

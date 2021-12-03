@@ -493,6 +493,18 @@ tryRename!(df, renamelist::Pair) = tryRename(df, [renamelist])
 tryRename!(df, renamelist::Vector{Pair{T,T}}) where T <: Any = tryRename(df, map(p->Symbol(p[1])=>Symbol(p[2]), renamelist))
 tryRename!(df, renamelist::Vector{Pair{Symbol, Symbol}}) = tryRenameFn(df, filter(p->p[1] in map(Symbol, names(df)), renamelist), rename!)
 tryRenameFn(df, renamelist, fn) = fn(df, renamelist)
+
+"""
+	dropByName!(df, fn)
+	dropByName(df, fn)
+
+Drop the columns whose names return true for the given function
+# Example
+	dropByName!(orders, n->startswith(n, "Sale") || startswith(n, "Order"))
+"""
+dropByName!(df, fn) = select!(df, Not(map(fn, names(df))))
+dropByName(df, fn) = select(df, Not(map(fn, names(df))))
+
 	
 ###
 end
