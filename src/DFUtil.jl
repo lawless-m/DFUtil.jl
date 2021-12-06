@@ -102,7 +102,8 @@ All the columns not in the grouping *must* have a `+` method
 - `group_by` Vector of String names of the columns to group by
 - `replace_with` by default DataFrames takes the column names and appends _function. Instead use this string.
 """
-sum_columns(df; group_by::Vector{String}=Vector{String}(), replace_with="s") = @pipe groupby(df, group_by) |>
+sum_columns(df; group_by=Vector{String}(), replace_with="s") = @pipe map(String, group_by) |>
+		groupby(df, _) |>
 		combine(_,  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ]) |>
 		rename(_, map(c-> c=>replace(c, "_function"=>replace_with), names(_)))
 
@@ -136,7 +137,7 @@ function group_data_into_periods(df, date_column, period; andgrpby=Vector{String
 
 	@pipe transform(df, date_column => ByRow(dt -> period_fns[period](dt)) => "$(date_column)_function") |>
 		select(_, Not(date_column)) |> 
-		sum_columns(_, group_by=vcat(andgrpby, ["$(date_column)_function"]))
+		sum_columns(_, group_by=vcat(map(String, andgrpby), ["$(date_column)_function"]))
 end
 
 # period functions
