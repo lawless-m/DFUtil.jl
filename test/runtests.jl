@@ -12,7 +12,6 @@ dfac = DataFrame([[1,2,3], [4,5,6]], ["a", "c"])
 dfad = DataFrame([[1,2,3], [4,5,6]], ["a", "d"])
 dfabcd = DataFrame([[1,2,3], [4,5,6], [4,5,6], [4,5,6]], ["a", "b", "c", "d"])
 
-
 stdtest = IOBuffer()
 eq(_, t) = String(take!(stdtest)) == t
 
@@ -43,4 +42,6 @@ eq(_, t) = String(take!(stdtest)) == t
     @test tryRename(dfab, [:b=>:c]) == dfac
     @test tryRename(dfab, "b"=>"c") == dfac
     @test tryRename(df, [:a=>:q, :b=>:z, :Not=>:Present]) == DataFrame([[1,2],[3,4],[4,5]],["q", "z", "c"])
+    @test dropByName!(dfab, n->n=="a") == DataFrame([[4,5,6]], ["b"])
+    @test to_csv_text(colsToGrid(DataFrame([["a", "b", "c"], ["d", "e", "f"], [1,2,3], [4,5,6]], ["c1", "c2", "c3", "v"]), :c1, :c2, :v, "see")) == "see,d,e,f\na,4,,\nb,,5,\nc,,,6\n"
 end

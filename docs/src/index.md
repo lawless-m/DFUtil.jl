@@ -89,3 +89,7 @@ tryRename
 ```@docs
 dropByName!
 ```
+
+```@docs
+colsToGrid
+```
