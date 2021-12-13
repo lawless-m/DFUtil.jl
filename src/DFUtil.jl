@@ -329,7 +329,7 @@ print_term(io, row, key, prefix="") = print(io, prefix, "\"$(kesc(key))\" : ", "
 # print all key value pairs, with appropriate comma-ing
 function print_terms(io, row)
 	print_term(io, row, names(row)[1], "")
-	broadcast(term -> print_term(io, row, term, ", "), names(row)[2:end]);
+	foreach(term -> print_term(io, row, term, ", "), names(row)[2:end])
 end
 
 # print a compete row, with single pkey
