@@ -9,7 +9,7 @@ export sum_columns, group_data_into_periods, match_row, to_json, to_json_var, to
 export de_miss_rows, include_or_exclude, firstrow, lastrow, nthrow
 export pQuarter, pWeek, pYear, pMonth
 export to_csv_text, from_csv_text
-export concat!, leftjoiner, tryRename, tryRename!
+export concat!, leftjoiner, tryRename, tryRename!, dropByName!, colsToGrid
 
 function force_vector(v)
 	if isa(v, String) || isa(v, Symbol)
@@ -103,7 +103,11 @@ All the columns not in the grouping *must* have a `+` method
 - `replace_with` by default DataFrames takes the column names and appends _function. Instead use this string.
 """
 sum_columns(df; group_by=Vector{String}(), replace_with="s") = @pipe map(String, group_by) |>
+<<<<<<< HEAD
 		groupby(df, group_by) |>
+=======
+		groupby(df, _) |>
+>>>>>>> be3f7a0bb35cc816c82a976b286e20a98edb8b1c
 		combine(_,  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ]) |>
 		rename(_, map(c-> c=>replace(c, "_function"=>replace_with), names(_)))
 
@@ -329,7 +333,7 @@ print_term(io, row, key, prefix="") = print(io, prefix, "\"$(kesc(key))\" : ", "
 # print all key value pairs, with appropriate comma-ing
 function print_terms(io, row)
 	print_term(io, row, names(row)[1], "")
-	broadcast(term -> print_term(io, row, term, ", "), names(row)[2:end]);
+	foreach(term -> print_term(io, row, term, ", "), names(row)[2:end])
 end
 
 # print a compete row, with single pkey
@@ -506,6 +510,46 @@ Drop the columns whose names return true for the given function
 dropByName!(df, fn) = select!(df, Not(map(fn, names(df))))
 dropByName(df, fn) = select(df, Not(map(fn, names(df))))
 
-	
+"""
+	colsToGrid(df, x, y, v, col1name)
+
+For a given DataFrame, turn the values of one of the columns into the name of the output columns
+and use a given column as the values. That's harder to describe than illustrate!
+
+# Examples
+
+	julia> df = DataFrame([["a", "b", "c"], ["d", "e", "f"], [1,2,3], [4,5,6]], ["c1", "c2", "c3", "v"])
+	3×4 DataFrame
+	Row │ c1      c2      c3     v    
+		│ String  String  Int64  Int64 
+   ─────┼──────────────────────────────
+	  1 │ a       d           1      4
+	  2 │ b       e           2      5
+	  3 │ c       f           3      6
+   
+   julia> colsToGrid(df, :c1, :c2, :v, "see")
+   
+   3×4 DataFrame
+   Row │ see     d        e        f       
+	   │ String  Int64?   Int64?   Int64?  
+  ─────┼───────────────────────────────────
+	 1 │ a             4  missing  missing 
+	 2 │ b       missing        5  missing 
+	 3 │ c       missing  missing        6
+
+	 #  result = DataFrame([["a", "b", "c"], [4, missing, missing], [missing, 5, missing], [missing, missing, 6]], ["see", "d", "e", "f"])
+"""
+function colsToGrid(df, x, y, v, col1name)
+	xs = unique(df[!, x]) |> sort
+	ys = unique(df[!, y]) |> sort
+	xref = Dict(xx=>Dict([r[y]=>r[v] for r in eachrow(filter(row->row[x] == xx, df))]) for xx in xs)
+	grid = DataFrame()
+	grid[!, col1name] = xs
+	for yy in ys
+		grid[!, yy] = map(k->get(xref[k], yy, missing), xs)
+	end
+	grid
+end
+
 ###
 end
