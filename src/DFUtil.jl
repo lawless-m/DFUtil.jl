@@ -103,11 +103,7 @@ All the columns not in the grouping *must* have a `+` method
 - `replace_with` by default DataFrames takes the column names and appends _function. Instead use this string.
 """
 sum_columns(df; group_by=Vector{String}(), replace_with="s") = @pipe map(String, group_by) |>
-<<<<<<< HEAD
-		groupby(df, group_by) |>
-=======
 		groupby(df, _) |>
->>>>>>> be3f7a0bb35cc816c82a976b286e20a98edb8b1c
 		combine(_,  [ c => c->sum(skipmissing(c)) for c in filter(n->!(n in group_by), names(df)) ]) |>
 		rename(_, map(c-> c=>replace(c, "_function"=>replace_with), names(_)))
 
