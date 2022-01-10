@@ -10,7 +10,7 @@ Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 
 [compat]
-CSV = "0.8, 0.9"
+CSV = "~0.8"
 DataFrames = "1"
 Pipe = "1"
 julia = "1.6"
