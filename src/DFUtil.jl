@@ -68,16 +68,16 @@ If both are given, the `includes` take priority
 
 """	
 function include_or_exclude(df; includes=nothing, excludes=nothing)
-	if excludes == nothing && includes == nothing
+	if excludes === nothing && includes === nothing
 		return df
 	end
 
-	if excludes == nothing
+	if excludes === nothing
 		# force vector to makes sure it returns a DataFrame
 		return df[!, force_vector(includes)] 
 	end
 
-	if includes == nothing
+	if includes === nothing
 		return df[!, Not(excludes)]
 	end
 	# we have includes *and* excludes. 
